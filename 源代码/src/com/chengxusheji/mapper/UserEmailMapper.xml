@@ -1,0 +1,49 @@
+﻿<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.UserEmailMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加客户邮件记录 -->
+	<insert id="addUserEmail" parameterType="userEmail">
+		insert into t_userEmail(title,content,userObj,sendTime) values 
+		(#{title},#{content},#{userObj.user_name},#{sendTime})
+	</insert>
+
+	<!-- 按照查询条件分页查询客户邮件记录 -->
+	<select id="queryUserEmail" resultMap="userEmailMap" >
+		select t_userEmail.* from t_userEmail,t_userInfo ${where} and t_userEmail.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="userEmailMap" type="userEmail">
+        <id property="emailId" column="emailId" />
+        <association property="userObj" column="userObj" select="com.chengxusheji.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有客户邮件记录 -->
+	<select id="queryUserEmailList" resultMap="userEmailMap" >
+		select t_userEmail.* from t_userEmail,t_userInfo ${where} and t_userEmail.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的客户邮件记录数 -->
+	<select id="queryUserEmailCount" resultType="int">
+		select count(*) from t_userEmail,t_userInfo ${where} and t_userEmail.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个客户邮件记录 -->
+	<select id="getUserEmail" parameterType="int" resultMap="userEmailMap">
+		select * from t_userEmail where t_userEmail.emailId = #{emailId}
+	</select>
+
+	<!-- 更新客户邮件记录 -->
+	<update id="updateUserEmail" parameterType="userEmail">
+		update t_userEmail set title=#{title},content=#{content},userObj=#{userObj.user_name},sendTime=#{sendTime} where emailId = #{emailId}
+	</update>
+
+	<!-- 删除客户邮件记录 -->
+	<delete id="deleteUserEmail" parameterType="int">
+		delete from t_userEmail where emailId=#{emailId}
+	</delete>
+
+</mapper>
